@@ -31,10 +31,10 @@ const RANKS = [
   "king"
 ];
 
+const UNSHUFFLED_DECK = RANKS.flatMap(rank =>
+  SUITS.map(suit => `${rank} of ${suit}`)
+);
+
 export const generateShuffledDeck = () => {
-  const unshuffledDeck = RANKS.reduce(
-    (deck, rank) => [...deck, ...SUITS.map(suit => `${rank} of ${suit}`)],
-    []
-  );
-  return shuffle(unshuffledDeck);
+  return shuffle(UNSHUFFLED_DECK);
 };

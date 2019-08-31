@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import PlayerSide from "./components/PlayerSide/PlayerSide";
 import DealerSide from "./components/DealerSide/DealerSide";
 import ControlDashboard from "./components/ControlDashboard/ControlDashboard";
@@ -10,7 +10,7 @@ const App = () => {
   const [deck, setDeck] = useState([]);
   const [chips, setChips] = useState(1000);
   const [playerHands, setPlayerHands] = useState([]);
-  const [currentPlayerHand, setCurrentPlayerHand] = useState([]);
+  const [currentHand, setCurrentHand] = useState([]);
   const [dealerHand, setDealerHand] = useState([]);
   const [bet, setBet] = useState(0);
   const [isDouble, toggleDouble] = useState(false);
@@ -20,49 +20,61 @@ const App = () => {
   const testMode = true;
 
   useEffect(() => {
-    if (testMode) {
-      const mockPlayerHands = [["seven of clubs", "seven of hearts"]];
-      const mockCurrentPlayerHand = ["seven of clubs", "seven of hearts"];
-      const mockDeck = generateShuffledDeck().filter(
-        card => card !== "seven of clubs" && card !== "seven of hearts"
-      );
-      setDeck(mockDeck);
-      setPlayerHands(mockPlayerHands);
-      setCurrentPlayerHand(mockCurrentPlayerHand);
-    } else {
-      const shuffledDeck = generateShuffledDeck();
-      setDeck(shuffledDeck);
-    }
+    dealCards();
   }, []);
 
   useEffect(() => {
-    if (deck.length === 52 && !testMode) dealHands();
-  }, [deck]);
-
-  useEffect(() => {
-    if (sumHand(currentPlayerHand) >= 21) {
+    if (sumHand(currentHand) >= 21) {
       const handsCopy = cloneDeep(playerHands);
       const currentIndex = playerHands.findIndex(hand =>
-        isEqual(hand, currentPlayerHand)
+        isEqual(hand, currentHand)
       );
       const nextHand = handsCopy[currentIndex + 1];
       if (nextHand) {
-        setCurrentPlayerHand(nextHand);
+        setCurrentHand(nextHand);
       } else {
         setTurn("dealer");
       }
     }
-  }, [currentPlayerHand]);
+  }, [currentHand]);
 
-  const dealHands = () => {
-    const deckCopy = [...deck];
-    const playerHand = [deckCopy.pop(), deckCopy.pop()];
-    const dealerHand = [deckCopy.pop(), deckCopy.pop()];
-    setPlayerHands([playerHand]);
-    setDealerHand(dealerHand);
-    setDeck(deckCopy);
-    setCurrentPlayerHand(playerHand);
+  const dealCards = () => {
+    if (testMode) {
+      const mockPlayerHands = [["seven of clubs", "seven of hearts"]];
+      const mockcurrentHand = ["seven of clubs", "seven of hearts"];
+      const mockDealerHand = ["two of spades", "two of clubs"];
+      const mockDeck = generateShuffledDeck().filter(
+        card =>
+          ![
+            "seven of clubs",
+            "seven of hearts",
+            "seven of diamonds",
+            "seven of spades",
+            "two of spades",
+            "two of clubs"
+          ].includes(card)
+      );
+      mockDeck.push("seven of diamonds", "seven of spades");
+      setDeck(mockDeck);
+      setDealerHand(mockDealerHand);
+      setPlayerHands(mockPlayerHands);
+      setCurrentHand(mockcurrentHand);
+    } else {
+      const shuffledDeck = generateShuffledDeck();
+      const playerHand = [shuffledDeck.pop(), shuffledDeck.pop()];
+      const dealerHand = [shuffledDeck.pop(), shuffledDeck.pop()];
+      setDeck(shuffledDeck);
+      setPlayerHands([playerHand]);
+      setCurrentHand(playerHand);
+      setDealerHand(dealerHand);
+    }
   };
+
+  useEffect(() => {
+    if (turn === "dealer" && sumHand(dealerHand) < 17) {
+      hitDealer();
+    }
+  }, [turn, dealerHand]);
 
   const hitDealer = () => {
     const deckCopy = [...deck];
@@ -81,8 +93,10 @@ const App = () => {
         setDeck={setDeck}
         playerHands={playerHands}
         setPlayerHands={setPlayerHands}
-        currentPlayerHand={currentPlayerHand}
-        setCurrentPlayerHand={setCurrentPlayerHand}
+        currentHand={currentHand}
+        setCurrentHand={setCurrentHand}
+        turn={turn}
+        setTurn={setTurn}
       />
     </div>
   );
