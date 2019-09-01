@@ -15,8 +15,8 @@ const rankToValuesMap = {
 
 const getRankFromCard = card => card.split(" ")[0];
 
-const getHandTotals = hand => {
-  return hand.reduce(
+const getHandTotals = cards => {
+  return cards.reduce(
     (totals, currentCard) => {
       const rank = getRankFromCard(currentCard);
       if (rank === "ace") return { ...totals, totalAces: totals.totalAces + 1 };
@@ -34,7 +34,8 @@ const calculateScoreWithAces = (scoreWithoutAces, totalAces) => {
   return largerScore <= 21 ? largerScore : smallerScore;
 };
 
-export const sumHand = hand => {
-  const { scoreWithoutAces, totalAces } = getHandTotals(hand);
+export const sumHand = ({ cards }) => {
+  console.log(cards);
+  const { scoreWithoutAces, totalAces } = getHandTotals(cards);
   return calculateScoreWithAces(scoreWithoutAces, totalAces);
 };

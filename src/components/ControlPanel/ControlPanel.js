@@ -1,29 +1,37 @@
 import React from "react";
-import "./ControlDashboard.scss";
+import "./ControlPanel.scss";
+import BetInput from "../BetInput/BetInput";
+import GameButton from "../GameButton/GameButton";
+import ChipsTally from "../ChipsTally/ChipsTally";
 import { isSplittableHand } from "../../utils";
 import { isEqual, cloneDeep } from "lodash";
 
-const ControlDashboard = ({
+const ControlPanel = ({
   deck,
   setDeck,
+  bet,
+  setBet,
+  chips,
+  setChips,
   playerHands,
   setPlayerHands,
   currentHand,
   setCurrentHand,
   turn,
-  setTurn
+  setTurn,
+  setIsRiggedForSplits
 }) => {
   const hitPlayer = () => {
     //make copies
     const deckCopy = [...deck];
     const handsCopy = cloneDeep(playerHands);
-    const currentHandCopy = [...currentHand];
+    const currentHandCopy = cloneDeep(currentHand);
 
     //deal a new card to the current hand
     const newCard = deckCopy.pop();
-    currentHandCopy.push(newCard);
+    currentHandCopy.cards.push(newCard);
 
-    //replace the old hand in the collection of player hands with the new hand
+    //replace the old hand in the player hands collection
     const currentHandIndex = playerHands.findIndex(hand =>
       isEqual(hand, currentHand)
     );
@@ -38,22 +46,25 @@ const ControlDashboard = ({
   const handleSplit = () => {
     //make copies
     const handsCopy = cloneDeep(playerHands);
-    const currentHandCopy = [...currentHand];
+    const currentHandCopy = cloneDeep(currentHand);
 
-    //split the hand and add them to the player hands array
+    //replace the hand with 2 split hands
     const currentHandIndex = playerHands.findIndex(hand =>
       isEqual(hand, currentHand)
     );
     handsCopy.splice(
       currentHandIndex,
       1,
-      [currentHandCopy[0]],
-      [currentHandCopy[1]]
+      { cards: [currentHandCopy.cards[0]], bet },
+      { cards: [currentHandCopy.cards[1]], bet }
     );
 
-    //set state
-    setCurrentHand([currentHandCopy[0]]);
+    //set state with the original card remaining the current hand
+    setCurrentHand(handsCopy[0]);
     setPlayerHands(handsCopy);
+    const newBet = (bet * handsCopy.length) / (handsCopy.length - 1);
+    setBet(newBet);
+    setChips(chips => chips - (newBet - bet));
   };
 
   const handleStand = () => {
@@ -70,16 +81,20 @@ const ControlDashboard = ({
   };
 
   return (
-    <div className="control-dashboard-wrapper">
-      <button>Bet</button>
-      {turn === "player" && <button onClick={hitPlayer}>Hit</button>}
-      <button onClick={handleStand}>Stand</button>
-      <button>Double Down</button>
-      {isSplittableHand(currentHand) && (
-        <button onClick={handleSplit}>Split</button>
+    <>
+      <ChipsTally chips={chips} />
+      {bet === 0 && (
+        <BetInput setBet={setBet} chips={chips} setChips={setChips} />
       )}
-    </div>
+      {turn === "player" && <GameButton onClick={hitPlayer} content="Hit" />}
+      <GameButton onClick={handleStand} content="Stand" />
+      <GameButton onClick={() => {}} content="Double Down" />
+      {isSplittableHand(currentHand) && (
+        <GameButton onClick={handleSplit} content="Split" />
+      )}
+      <GameButton onClick={setIsRiggedForSplits} content="Rig The Game!" />
+    </>
   );
 };
 
-export default ControlDashboard;
+export default ControlPanel;

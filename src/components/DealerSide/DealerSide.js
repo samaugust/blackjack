@@ -5,7 +5,9 @@ import "./DealerSide.scss";
 
 const DealerSide = ({ dealerHand }) => (
   <div className="dealer-side-wrapper">
-    <Hand hand={dealerHand} score={sumHand(dealerHand)} />
+    {dealerHand.cards.length && (
+      <Hand hand={dealerHand} score={sumHand(dealerHand)} />
+    )}
   </div>
 );
 

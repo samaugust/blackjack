@@ -1,13 +1,15 @@
 .hand-wrapper {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  border: 2px solid brown;
+  align-items: center;
   .scorebox {
-    background: green;
+    height: 40px;
+    width: 40px;
+    text-align: center;
+    background: gray;
+    font-weight: 600;
     font-size: 20px;
-    color: red;
   }
   .cards-wrapper {
   }

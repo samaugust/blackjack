@@ -1,4 +1,4 @@
 const getRankFromCard = card => card.split(" ")[0];
 
-export const isSplittableHand = hand =>
-  hand.length === 2 && getRankFromCard(hand[0]) === getRankFromCard(hand[1]);
+export const isSplittableHand = ({ cards }) =>
+  cards.length === 2 && getRankFromCard(cards[0]) === getRankFromCard(cards[1]);
