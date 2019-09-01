@@ -1,4 +1,5 @@
 .App {
+  display: relative;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -17,5 +18,21 @@
     width: 90%;
     height: 19%;
     border: 2px solid;
+  }
+  .outcome-notification {
+    position: absolute;
+    font-size: 70px;
+    font-weight: 900;
+    top: 90px;
+    left: 130px;
+  }
+  .game-over-notification {
+    text-align: center;
+    position: absolute;
+    font-size: 40px;
+    font-weight: 600;
+    top: 215px;
+    left: 170px;
+    width: 520px;
   }
 }

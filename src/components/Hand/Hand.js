@@ -1,12 +1,17 @@
 import React from "react";
+import { isEqual } from "lodash";
 import Card from "../Card/Card";
 import "./Hand.scss";
 
-const Hand = ({ hand: { cards }, score }) => (
-  <div className="hand-wrapper">
+const Hand = ({ hand, score, currentHand }) => (
+  <div
+    className={
+      isEqual(currentHand, hand) ? "hand-wrapper selected" : "hand-wrapper"
+    }
+  >
     <div className="scorebox">{score}</div>
     <div className="cards-wrapper">
-      {cards.map(card => (
+      {hand.cards.map(card => (
         <Card key={card} card={card} />
       ))}
     </div>

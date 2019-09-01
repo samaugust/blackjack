@@ -6,7 +6,7 @@ const BetInput = ({ setBet, chips, setChips }) => {
   const [errorMessage, setErrorMessage] = useState("");
   useEffect(() => {
     if (errorMessage) {
-      const revert = setTimeout(() => setErrorMessage(""), 1400);
+      const revert = setTimeout(() => setErrorMessage(""), 1750);
       return () => clearTimeout(revert);
     }
   }, [errorMessage]);
@@ -36,10 +36,10 @@ const BetInput = ({ setBet, chips, setChips }) => {
     }
   };
   return (
-    <div className="bet-input">
+    <div className="bet-input-wrapper">
       <input value={input} onChange={handleChange} />
       <button onClick={handleClick}>Bet</button>
-      {errorMessage && <span style={{ color: "red" }}>{errorMessage}</span>}
+      {errorMessage && <p className="error">{errorMessage}</p>}
     </div>
   );
 };

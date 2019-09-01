@@ -3,10 +3,15 @@ import Hand from "../Hand/Hand";
 import { sumHand } from "../../utils";
 import "./PlayerSide.scss";
 
-const PlayerSide = ({ playerHands, chips }) => (
+const PlayerSide = ({ playerHands, currentHand }) => (
   <div className="player-side-wrapper">
     {playerHands.map(hand => (
-      <Hand key={JSON.stringify(hand)} hand={hand} score={sumHand(hand)} />
+      <Hand
+        key={JSON.stringify(hand)}
+        hand={hand}
+        score={sumHand(hand)}
+        currentHand={currentHand}
+      />
     ))}
   </div>
 );

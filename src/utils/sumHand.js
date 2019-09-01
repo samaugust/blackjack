@@ -35,7 +35,6 @@ const calculateScoreWithAces = (scoreWithoutAces, totalAces) => {
 };
 
 export const sumHand = ({ cards }) => {
-  console.log(cards);
   const { scoreWithoutAces, totalAces } = getHandTotals(cards);
   return calculateScoreWithAces(scoreWithoutAces, totalAces);
 };

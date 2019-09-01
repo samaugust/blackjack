@@ -1,0 +1,10 @@
+.bet-input-wrapper {
+  position: relative;
+  .error {
+    position: absolute;
+    top: 14px;
+    color: red;
+    font-size: 12px;
+    font-weight: 600;
+  }
+}

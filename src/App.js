@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import PlayerSide from "./components/PlayerSide/PlayerSide";
 import DealerSide from "./components/DealerSide/DealerSide";
 import ControlPanel from "./components/ControlPanel/ControlPanel";
@@ -6,34 +6,55 @@ import { cloneDeep, isEqual } from "lodash";
 import {
   generateShuffledDeck,
   sumHand,
-  rigGameForSplits,
   isWin,
-  isTie
+  isTie,
+  rigGameForSplits
 } from "./utils";
 import "./App.scss";
 
 const App = () => {
+  //----------------------------------------------------------------//
+  //                      INITIAL STATE                             //
+  //----------------------------------------------------------------//
+
   const [deck, setDeck] = useState([]);
   const [chips, setChips] = useState(1000);
   const [bet, setBet] = useState(0);
   const [turn, setTurn] = useState("player");
   const [dealerHand, setDealerHand] = useState({ cards: [] });
-  const [isDouble, toggleDouble] = useState(false);
-  const [isInsured, toggleIsInsured] = useState(false);
-  //playerHands plural because of the possibility of splitting
+  //we can have multiple player hands due to splitting
   const [playerHands, setPlayerHands] = useState([]);
-  //if there are multiple hands due to a split, currentHand
-  //refers to the one which the player makes decisions on currently
-  const [currentHand, setCurrentHand] = useState({ cards: [] });
-  //stacks the deck for splitting as many as 3 times
-  //to test the functionality/logic involved in splitting
-  const [isRiggedForSplits, setIsRiggedForSplits] = useState(true);
+  //refers to the hand which the player makes decisions on currently
+  const [currentHand, setCurrentHand] = useState({ cards: [], bet: 0 });
+  //stacks the deck to test the functionality/logic involved in splitting
+  const [isRiggedForSplits, toggleIsRiggedForSplits] = useState(false);
+
+  const [outcomeNotification, setOutcomeNotification] = useState("");
+
+  const [gameOverNotification, setGameOverNotification] = useState("");
+
+  // console.log({ playerHands });
+  // console.log({ dealerHand });
+
+  //----------------------------------------------------------------//
+  //                        SIDE EFFECTS                            //
+  //----------------------------------------------------------------//
+
+  //if bet has been submitted and player has no hand(s) dealt, deal cards
   useEffect(() => {
     if (bet > 0 && !playerHands.length) dealCards();
   }, [bet]);
 
+  /*
+  determines what to do if the current player hand "busts" (over 21)
+  if it is the only hand or is the last hand of splitted hands,
+  it is now the dealer's turn. otherwise, we move to the next player hand
+  */
   useEffect(() => {
-    if (sumHand(currentHand) >= 21) {
+    if (
+      sumHand(currentHand) >= 21 &&
+      !playerHands.every(hand => sumHand(hand) > 21)
+    ) {
       const handsCopy = cloneDeep(playerHands);
       const currentIndex = playerHands.findIndex(hand =>
         isEqual(hand, currentHand)
@@ -46,6 +67,39 @@ const App = () => {
       }
     }
   }, [currentHand]);
+
+  //if it is the dealer's turn and the dealer's hand is less than 16,
+  //hit the dealer. else it is time to determine the outcome
+  useEffect(() => {
+    if (turn === "dealer") {
+      if (sumHand(dealerHand) < 17) {
+        const delayedDeal = setTimeout(hitDealer, 2000);
+        return () => clearTimeout(delayedDeal);
+      } else determineOutcome();
+    }
+  }, [turn, dealerHand]);
+
+  /*
+  checks to see whether every player hand is "busted" (over 21)
+  if so, there is no need for the dealer to be dealt cards 
+  and we move on to the next deal
+  */
+  useEffect(() => {
+    if (playerHands.length && playerHands.every(hand => sumHand(hand) > 21)) {
+      determineOutcome();
+    }
+  }, [playerHands]);
+
+  useEffect(() => {
+    if (outcomeNotification) {
+      const delayClearing = setTimeout(() => setOutcomeNotification(""), 9000);
+      return () => clearTimeout(delayClearing);
+    }
+  }, [outcomeNotification]);
+
+  //----------------------------------------------------------------//
+  //                         HELPERS                                //
+  //----------------------------------------------------------------//
 
   const dealCards = () => {
     if (isRiggedForSplits) {
@@ -61,40 +115,44 @@ const App = () => {
       setCurrentHand(riggedCurrentHand);
     } else {
       const shuffledDeck = generateShuffledDeck();
-      const playerHand = {
+      const newPlayerHand = {
         cards: [shuffledDeck.pop(), shuffledDeck.pop()],
         bet
       };
-      const dealerHand = { cards: [shuffledDeck.pop(), shuffledDeck.pop()] };
+      const newDealerHand = { cards: [shuffledDeck.pop(), shuffledDeck.pop()] };
       setDeck(shuffledDeck);
-      setPlayerHands([playerHand]);
-      setCurrentHand(playerHand);
-      setDealerHand(dealerHand);
+      setPlayerHands([newPlayerHand]);
+      setCurrentHand(newPlayerHand);
+      setDealerHand(newDealerHand);
     }
   };
 
   const determineOutcome = () => {
-    // const dealerScore = sumHand(dealerHand);
-    // const playerScores = playerHands.map(({ cards }) => sumHand(cards));
-    // const length = playerHands.length;
-    // const wins = playerScores.filter(
-    //   score =>
-    //     (score <= 21 && dealerScore > 21) ||
-    //     (score <= 21 && score > dealerScore)
-    // ).length;
-    // const ties = playerScores.filter(
-    //   score => (score > 21 && dealerScore > 21) || score === dealerScore
-    // ).length;
-    // const chipsWon = (wins * bet * 2) / length + (ties * bet) / length;
-    const totalChipsWon = playerHands.reduce((totalChipsWon, playerHand) => {
+    //for every player hand, we determine whether it is a win or a tie
+    //compared to the dealer's hand and tally up the chip returns accordingly
+    const netChipsWon = playerHands.reduce((netChipsWon, playerHand) => {
       return isWin(playerHand, dealerHand)
-        ? totalChipsWon + playerHand.bet * 2
+        ? netChipsWon + playerHand.bet * 2
         : isTie(playerHand, dealerHand)
-        ? totalChipsWon + playerHand.bet
-        : totalChipsWon;
+        ? netChipsWon + playerHand.bet
+        : netChipsWon;
     }, 0);
-    setChips(chips => chips + totalChipsWon);
-    resetStateForNewHand();
+    setChips(chips => chips + netChipsWon);
+    if (chips === 0 && netChipsWon === 0)
+      setGameOverNotification(
+        "You have ZERO chips. You are shit out of luck 😊"
+      );
+    const netBet = playerHands.reduce((netBet, { bet }) => netBet + bet, 0);
+    const netGain = netChipsWon - netBet;
+    const message =
+      netGain > 0
+        ? `You won ${netGain} chips`
+        : netGain === 0
+        ? "You broke even"
+        : `You lost ${Math.abs(netGain)} chips`;
+    setOutcomeNotification(message);
+    const delayResetting = setTimeout(resetStateForNewHand, 3000);
+    return () => clearTimeout(delayResetting);
   };
 
   const resetStateForNewHand = () => {
@@ -106,41 +164,25 @@ const App = () => {
     setTurn("player");
   };
 
-  useEffect(() => {
-    if (turn === "dealer" && sumHand(dealerHand) < 17) {
-      hitDealer();
-    }
-  }, [turn, dealerHand]);
-
-  const hitDealer = () => {
+  const hitDealer = useCallback(() => {
+    //make copies
     const deckCopy = [...deck];
     const dealerHandCopy = cloneDeep(dealerHand);
-
+    //deal card
     dealerHandCopy.cards.push(deckCopy.pop());
+    //update state
     setDealerHand(dealerHandCopy);
     setDeck(deckCopy);
-  };
+  }, [deck]);
 
-  useEffect(() => {
-    console.log(dealerHand);
-    if (
-      turn === "dealer" &&
-      dealerHand.cards.length &&
-      sumHand(dealerHand) >= 17
-    )
-      determineOutcome();
-  }, [turn, dealerHand]);
-
-  useEffect(() => {
-    if (playerHands.length && playerHands.every(hand => sumHand(hand) > 21)) {
-      resetStateForNewHand();
-    }
-  }, [playerHands]);
+  //----------------------------------------------------------------//
+  //                         RENDER                                 //
+  //----------------------------------------------------------------//
 
   return (
     <div className="App">
       <section className="game-display-section">
-        <PlayerSide playerHands={playerHands} chips={chips} />
+        <PlayerSide playerHands={playerHands} currentHand={currentHand} />
         <DealerSide dealerHand={dealerHand} />
       </section>
       <section className="control-panel-section">
@@ -157,9 +199,15 @@ const App = () => {
           setCurrentHand={setCurrentHand}
           turn={turn}
           setTurn={setTurn}
-          setIsRiggedForSplits={setIsRiggedForSplits}
+          toggleIsRiggedForSplits={toggleIsRiggedForSplits}
         />
       </section>
+      {outcomeNotification && (
+        <p className="outcome-notification">{outcomeNotification}</p>
+      )}
+      {gameOverNotification && (
+        <p className="game-over-notification">{gameOverNotification}</p>
+      )}
     </div>
   );
 };
