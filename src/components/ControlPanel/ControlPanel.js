@@ -153,11 +153,12 @@ const ControlPanel = ({
           <>
             <GameButton onClick={e => hitPlayer()} content="Hit" />
             <GameButton onClick={handleStand} content="Stand" />
-            {(currentHand.cards.length === 2 ||
-              currentHand.cards.length === 1) && (
-              <GameButton onClick={handleDoubleDown} content="Double Down" />
-            )}
-            {isSplittableHand(currentHand) && (
+            {chips > bet &&
+              (currentHand.cards.length === 2 ||
+                currentHand.cards.length === 1) && (
+                <GameButton onClick={handleDoubleDown} content="Double Down" />
+              )}
+            {chips > bet && isSplittableHand(currentHand) && (
               <GameButton onClick={handleSplit} content="Split" />
             )}
           </>
