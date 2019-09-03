@@ -144,7 +144,7 @@ const App = () => {
     setChips(chips => chips + netChipsWon);
     //game over condition:
     //if player has 0 chips left and didn't win any chips this deal
-    if (chips === 0 && netChipsWon === 0) {
+    if (chips <= 0 && netChipsWon === 0) {
       setGameOverNotification(
         "You have ZERO chips. You are crap out of luck 😊"
       );

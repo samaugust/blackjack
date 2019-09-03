@@ -13,6 +13,7 @@ const PlayerSide = ({ playerHands, currentHand }) => (
         currentHand={currentHand}
       />
     ))}
+    <p className="player-label">PLAYER</p>
   </div>
 );
 

@@ -1,4 +1,5 @@
 .player-side-wrapper {
+  position: relative;
   height: 100%;
   width: 50%;
   display: flex;
@@ -6,4 +7,11 @@
   justify-content: flex-start;
   align-items: center;
   flex-wrap: wrap;
+  outline: 8px solid rgb(68, 67, 67);
+  .player-label {
+    position: absolute;
+    bottom: -40px;
+    font-size: 50px;
+    font-weight: 700;
+  }
 }

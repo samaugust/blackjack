@@ -1,7 +1,15 @@
 .dealer-side-wrapper {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   height: 100%;
   width: 50%;
+  outline: 8px solid rgb(68, 67, 67);
+  .dealer-label {
+    position: absolute;
+    bottom: -40px;
+    font-size: 50px;
+    font-weight: 700;
+  }
 }

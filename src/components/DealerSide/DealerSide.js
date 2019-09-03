@@ -8,6 +8,7 @@ const DealerSide = ({ dealerHand, turn }) => (
     {dealerHand.cards.length > 0 && (
       <Hand hand={dealerHand} score={sumHand(dealerHand)} turn={turn} />
     )}
+    <p className="dealer-label">DEALER</p>
   </div>
 );
 
