@@ -1,19 +1,32 @@
 .hand-wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: fit-content;
   .scorebox {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 40px;
     width: 40px;
-    text-align: center;
-    background: gray;
+    margin-bottom: 4px;
+    background: rgb(236, 228, 228);
     font-weight: 600;
     font-size: 20px;
   }
   .cards-wrapper {
   }
+  .busted-message {
+    position: absolute;
+    top: 4px;
+    font-size: 50px;
+    color: red;
+    font-weight: 1000;
+  }
 }
 .selected {
-  border: 3px solid red;
+  border: 12px solid rgb(115, 98, 207);
+  background: rgb(115, 98, 207);
 }

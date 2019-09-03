@@ -21,7 +21,6 @@ const BetInput = ({ setBet, chips, setChips }) => {
     const containsNonNumber = regEx.test(value);
     if (containsNonNumber) {
       setErrorMessage("Only numbers allowed - duh!");
-      setInput(e.target.value.slice(0, -1));
     } else {
       setInput(e.target.value);
     }
@@ -35,11 +34,24 @@ const BetInput = ({ setBet, chips, setChips }) => {
       setChips(chips - submittedBet);
     }
   };
+  const handleEnter = e => {
+    if (e.key === "Enter") handleClick();
+  };
   return (
     <div className="bet-input-wrapper">
-      <input value={input} onChange={handleChange} />
-      <button onClick={handleClick}>Bet</button>
+      <input
+        className="bet-input"
+        value={input}
+        onChange={handleChange}
+        onKeyPress={handleEnter}
+      />
+      <button className="bet-input-button" onClick={handleClick}>
+        Bet
+      </button>
       {errorMessage && <p className="error">{errorMessage}</p>}
+      {input.length === 0 && (
+        <p className="enter-a-bet-message">Enter a bet first!</p>
+      )}
     </div>
   );
 };

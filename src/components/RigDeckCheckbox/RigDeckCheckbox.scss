@@ -1,0 +1,10 @@
+.rig-deck-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .rig-deck-label {
+    padding-left: 3px;
+    font-size: 17px;
+    font-weight: 550;
+  }
+}

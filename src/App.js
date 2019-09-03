@@ -1,7 +1,17 @@
 import React, { useEffect, useState, useCallback } from "react";
+
+/*********
+COMPONENTS
+**********/
 import PlayerSide from "./components/PlayerSide/PlayerSide";
 import DealerSide from "./components/DealerSide/DealerSide";
+import GameOverNotification from "./components/GameOverNotification/GameOverNotification";
+import OutcomeNotification from "./components/OutcomeNotification/OutcomeNotification";
 import ControlPanel from "./components/ControlPanel/ControlPanel";
+
+/************
+UTIL FUNCTIONS
+*************/
 import { cloneDeep, isEqual } from "lodash";
 import {
   generateShuffledDeck,
@@ -10,6 +20,10 @@ import {
   isTie,
   rigGameForSplits
 } from "./utils";
+
+/******
+STYLES
+*******/
 import "./App.scss";
 
 const App = () => {
@@ -29,11 +43,12 @@ const App = () => {
   //stacks the deck to test the functionality/logic involved in splitting
   const [isRiggedForSplits, toggleIsRiggedForSplits] = useState(false);
 
+  //notifications
   const [outcomeNotification, setOutcomeNotification] = useState("");
-
   const [gameOverNotification, setGameOverNotification] = useState("");
 
-  // console.log({ playerHands });
+  // console.log({ deck });
+  // console.log({playerHands})
   // console.log({ dealerHand });
 
   //----------------------------------------------------------------//
@@ -63,7 +78,8 @@ const App = () => {
       if (nextHand) {
         setCurrentHand(nextHand);
       } else {
-        setTurn("dealer");
+        const delayedSetTurn = setTimeout(() => setTurn("dealer"), 1000);
+        return () => clearTimeout(delayedSetTurn);
       }
     }
   }, [currentHand]);
@@ -73,9 +89,9 @@ const App = () => {
   useEffect(() => {
     if (turn === "dealer") {
       if (sumHand(dealerHand) < 17) {
-        const delayedDeal = setTimeout(hitDealer, 2000);
+        const delayedDeal = setTimeout(hitDealer, 1100);
         return () => clearTimeout(delayedDeal);
-      } else determineOutcome();
+      } else return determineOutcome();
     }
   }, [turn, dealerHand]);
 
@@ -89,13 +105,6 @@ const App = () => {
       determineOutcome();
     }
   }, [playerHands]);
-
-  useEffect(() => {
-    if (outcomeNotification) {
-      const delayClearing = setTimeout(() => setOutcomeNotification(""), 9000);
-      return () => clearTimeout(delayClearing);
-    }
-  }, [outcomeNotification]);
 
   //----------------------------------------------------------------//
   //                         HELPERS                                //
@@ -117,6 +126,8 @@ const App = () => {
       const shuffledDeck = generateShuffledDeck();
       const newPlayerHand = {
         cards: [shuffledDeck.pop(), shuffledDeck.pop()],
+        //we grab the base bet amount from global state but this
+        //can be mutated later by insurance or doubling down
         bet
       };
       const newDealerHand = { cards: [shuffledDeck.pop(), shuffledDeck.pop()] };
@@ -129,7 +140,7 @@ const App = () => {
 
   const determineOutcome = () => {
     //for every player hand, we determine whether it is a win or a tie
-    //compared to the dealer's hand and tally up the chip returns accordingly
+    //then tally up accordingly
     const netChipsWon = playerHands.reduce((netChipsWon, playerHand) => {
       return isWin(playerHand, dealerHand)
         ? netChipsWon + playerHand.bet * 2
@@ -138,9 +149,11 @@ const App = () => {
         : netChipsWon;
     }, 0);
     setChips(chips => chips + netChipsWon);
+    //game over condition:
+    //if player has 0 chips left and didn't win any chips this deal
     if (chips === 0 && netChipsWon === 0)
       setGameOverNotification(
-        "You have ZERO chips. You are shit out of luck 😊"
+        "You have ZERO chips. You are crap out of luck 😊"
       );
     const netBet = playerHands.reduce((netBet, { bet }) => netBet + bet, 0);
     const netGain = netChipsWon - netBet;
@@ -151,8 +164,6 @@ const App = () => {
         ? "You broke even"
         : `You lost ${Math.abs(netGain)} chips`;
     setOutcomeNotification(message);
-    const delayResetting = setTimeout(resetStateForNewHand, 3000);
-    return () => clearTimeout(delayResetting);
   };
 
   const resetStateForNewHand = () => {
@@ -162,17 +173,24 @@ const App = () => {
     setDealerHand({ cards: [] });
     setDeck([]);
     setTurn("player");
+    toggleIsRiggedForSplits(false);
+    setOutcomeNotification("");
+    setGameOverNotification("");
   };
 
   const hitDealer = useCallback(() => {
-    //make copies
-    const deckCopy = [...deck];
-    const dealerHandCopy = cloneDeep(dealerHand);
-    //deal card
-    dealerHandCopy.cards.push(deckCopy.pop());
-    //update state
-    setDealerHand(dealerHandCopy);
-    setDeck(deckCopy);
+    if (playerHands.every(hand => sumHand(hand) > 21)) {
+      determineOutcome();
+    } else {
+      //make copies
+      const deckCopy = [...deck];
+      const dealerHandCopy = cloneDeep(dealerHand);
+      //deal card
+      dealerHandCopy.cards.push(deckCopy.pop());
+      //update state
+      setDealerHand(dealerHandCopy);
+      setDeck(deckCopy);
+    }
   }, [deck]);
 
   //----------------------------------------------------------------//
@@ -183,7 +201,7 @@ const App = () => {
     <div className="App">
       <section className="game-display-section">
         <PlayerSide playerHands={playerHands} currentHand={currentHand} />
-        <DealerSide dealerHand={dealerHand} />
+        <DealerSide dealerHand={dealerHand} turn={turn} />
       </section>
       <section className="control-panel-section">
         <ControlPanel
@@ -199,14 +217,23 @@ const App = () => {
           setCurrentHand={setCurrentHand}
           turn={turn}
           setTurn={setTurn}
+          gameOverNotification={gameOverNotification}
+          outcomeNotification={outcomeNotification}
           toggleIsRiggedForSplits={toggleIsRiggedForSplits}
         />
       </section>
-      {outcomeNotification && (
-        <p className="outcome-notification">{outcomeNotification}</p>
+      {outcomeNotification && !gameOverNotification && (
+        <OutcomeNotification
+          outcomeNotification={outcomeNotification}
+          resetStateForNewHand={resetStateForNewHand}
+        />
       )}
       {gameOverNotification && (
-        <p className="game-over-notification">{gameOverNotification}</p>
+        <GameOverNotification
+          gameOverNotification={gameOverNotification}
+          resetStateForNewHand={resetStateForNewHand}
+          setChips={setChips}
+        />
       )}
     </div>
   );

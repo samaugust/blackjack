@@ -1,0 +1,14 @@
+.button-wrapper {
+  height: 50px;
+  width: 82.5px;
+  .game-button {
+    height: 100%;
+    width: 100%;
+    color: rgb(54, 19, 19);
+    border: rgb(36, 33, 32);
+    border-radius: 8%;
+  }
+  :hover {
+    cursor: pointer;
+  }
+}

@@ -1,10 +1,30 @@
 .bet-input-wrapper {
   position: relative;
+  .bet-input {
+    height: 36px;
+    width: 112px;
+    padding: 0px 0 0px 6px;
+    font-size: 18px;
+    background: lightblue;
+  }
+  .bet-input-button {
+    height: 41px;
+    width: 53px;
+    margin-left: 5px;
+  }
   .error {
     position: absolute;
-    top: 14px;
-    color: red;
-    font-size: 12px;
+    bottom: -10px;
+    color: rgb(189, 27, 27);
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .enter-a-bet-message {
+    position: absolute;
+    top: 27px;
+    left: 4px;
     font-weight: 600;
+    font-size: 15px;
   }
 }

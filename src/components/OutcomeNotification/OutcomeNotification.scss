@@ -1,0 +1,17 @@
+.outcome-notification-wrapper {
+  position: absolute;
+  font-size: 70px;
+  font-weight: 900;
+  top: 135px;
+  left: 204px;
+  .outcome-notification-button {
+    position: absolute;
+    bottom: 12px;
+    left: 233px;
+    height: 50px;
+    width: 125px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 17px;
+  }
+}
