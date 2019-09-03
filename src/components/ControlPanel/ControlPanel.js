@@ -41,16 +41,8 @@ const ControlPanel = ({
   const hitPlayer = () => {
     //make copies
     const deckCopy = [...deck];
-    //we check for updatedHands because hitPlayer() gets invoked in the
-    //doubledown() handler, which doesn't want to reference state but rather what
-    //the new state will be
-
-    //note: upon further reflection,
-    //this is an anti-pattern and not very readable. i have comments about it.
-    const handsCopy = cloneDeep(updatedHands ? updatedHands : playerHands);
-    const currentHandCopy = cloneDeep(
-      updatedCurrentHand ? updatedCurrentHand : currentHand
-    );
+    const handsCopy = cloneDeep(playerHands);
+    const currentHandCopy = cloneDeep(currentHand);
 
     //deal a new card to the current hand
     const newCard = deckCopy.pop();
@@ -124,7 +116,7 @@ const ControlPanel = ({
     setCurrentHand(currentHandCopy);
 
     //decrement player chip count correspondingly
-    setChips(chips => chips - oldBetAmount);
+    setChips(chips => chips - currentHandCopy.bet);
 
     //get index of current hand in the player hand array
     const currentIndex = playerHands.findIndex(hand =>
