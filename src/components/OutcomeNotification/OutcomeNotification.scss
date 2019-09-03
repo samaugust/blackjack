@@ -3,7 +3,7 @@
   font-size: 70px;
   font-weight: 900;
   top: 135px;
-  left: 204px;
+  left: 345px;
   .outcome-notification-button {
     position: absolute;
     bottom: 12px;
@@ -13,5 +13,9 @@
     border-radius: 8px;
     font-weight: 500;
     font-size: 17px;
+    &:hover {
+      background: rgb(89, 192, 226);
+      cursor: pointer;
+    }
   }
 }

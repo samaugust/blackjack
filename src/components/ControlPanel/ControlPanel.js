@@ -38,13 +38,15 @@ const ControlPanel = ({
   //----------------------------------------------------------------//
   //                         HELPERS                                //
   //----------------------------------------------------------------//
-  const hitPlayer = (updatedHands = null, updatedCurrentHand = null) => {
+  const hitPlayer = () => {
     //make copies
     const deckCopy = [...deck];
     //we check for updatedHands because hitPlayer() gets invoked in the
     //doubledown() handler, which doesn't want to reference state but rather what
     //the new state will be
-    //note: this is perhaps not very readable. i have comments about it.
+
+    //note: upon further reflection,
+    //this is an anti-pattern and not very readable. i have comments about it.
     const handsCopy = cloneDeep(updatedHands ? updatedHands : playerHands);
     const currentHandCopy = cloneDeep(
       updatedCurrentHand ? updatedCurrentHand : currentHand
@@ -71,7 +73,7 @@ const ControlPanel = ({
     const handsCopy = cloneDeep(playerHands);
     const currentHandCopy = cloneDeep(currentHand);
 
-    //replace the hand with 2 split hands
+    //replace the current hand with 2 split hands
     const currentHandIndex = playerHands.findIndex(hand =>
       isEqual(hand, currentHand)
     );
@@ -85,7 +87,6 @@ const ControlPanel = ({
     //update state
     setCurrentHand(handsCopy[0]);
     setPlayerHands(handsCopy);
-    const newBet = playerHands.reduce((newBet, { bet }) => newBet + bet);
     setChips(chips => chips - bet);
   };
 
@@ -108,32 +109,34 @@ const ControlPanel = ({
 
   const handleDoubleDown = () => {
     //make copies
+    const deckCopy = [...deck];
     const handsCopy = cloneDeep(playerHands);
+    const currentHandCopy = cloneDeep(currentHand);
+
+    //deal only one additional card
+    const newCard = deckCopy.pop();
+    currentHandCopy.cards.push(newCard);
+
+    //double the current bet
+    currentHandCopy.bet *= 2;
+
+    //update the state of current hand to reflect new bet and final card
+    setCurrentHand(currentHandCopy);
+
+    //decrement player chip count correspondingly
+    setChips(chips => chips - oldBetAmount);
 
     //get index of current hand in the player hand array
     const currentIndex = playerHands.findIndex(hand =>
       isEqual(hand, currentHand)
     );
 
-    //get bet amount to update
-    const oldBetAmount = currentHand.bet;
-
-    //update the individual hand's bet attribute
-    const updatedHand = { ...currentHand, bet: currentHand.bet * 2 };
-
-    setCurrentHand(updatedHand);
-    //decrement player chip count correspondingly
-    setChips(chips => chips - oldBetAmount);
-
     //update the player hands array with the updated hand
-    handsCopy.splice(currentIndex, 1, updatedHand);
+    handsCopy.splice(currentIndex, 1, currentHandCopy);
     setPlayerHands(handsCopy);
 
-    //deal only one additional card for this hand
-    hitPlayer(handsCopy, updatedHand);
-
-    //determine whether there is/are additional player hand/s
-    //or whether it is the dealer's turn now
+    //determine if it's the dealer's turn yet
+    //or whether we still have more player hands
     const nextHand = handsCopy[currentIndex + 1];
     if (nextHand) {
       setCurrentHand(nextHand);

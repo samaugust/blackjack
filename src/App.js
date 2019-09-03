@@ -55,7 +55,7 @@ const App = () => {
   //                        SIDE EFFECTS                            //
   //----------------------------------------------------------------//
 
-  //if bet has been submitted and player has no hand(s) dealt, deal cards
+  //if bet has been submitted and player has no hand dealt, deal cards
   useEffect(() => {
     if (bet > 0 && !playerHands.length) dealCards();
   }, [bet]);
@@ -111,23 +111,16 @@ const App = () => {
   //----------------------------------------------------------------//
 
   const dealCards = () => {
+    //this is for the game mode where you are guaranteed to be dealt 4 2s in a row
     if (isRiggedForSplits) {
-      const {
-        riggedDeck,
-        dealerHand,
-        riggedPlayerHands,
-        riggedCurrentHand
-      } = rigGameForSplits(bet);
-      setDeck(riggedDeck);
-      setDealerHand(dealerHand);
-      setPlayerHands(riggedPlayerHands);
-      setCurrentHand(riggedCurrentHand);
+      rigTheDeckAndDeal();
     } else {
       const shuffledDeck = generateShuffledDeck();
       const newPlayerHand = {
         cards: [shuffledDeck.pop(), shuffledDeck.pop()],
         //we grab the base bet amount from global state but this
-        //can be mutated later by insurance or doubling down
+        //can be mutated later by doubling down or insurance
+        //(insurance in future story)
         bet
       };
       const newDealerHand = { cards: [shuffledDeck.pop(), shuffledDeck.pop()] };
@@ -151,19 +144,21 @@ const App = () => {
     setChips(chips => chips + netChipsWon);
     //game over condition:
     //if player has 0 chips left and didn't win any chips this deal
-    if (chips === 0 && netChipsWon === 0)
+    if (chips === 0 && netChipsWon === 0) {
       setGameOverNotification(
         "You have ZERO chips. You are crap out of luck 😊"
       );
-    const netBet = playerHands.reduce((netBet, { bet }) => netBet + bet, 0);
-    const netGain = netChipsWon - netBet;
-    const message =
-      netGain > 0
-        ? `You won ${netGain} chips`
-        : netGain === 0
-        ? "You broke even"
-        : `You lost ${Math.abs(netGain)} chips`;
-    setOutcomeNotification(message);
+    } else {
+      const netBet = playerHands.reduce((netBet, { bet }) => netBet + bet, 0);
+      const netGain = netChipsWon - netBet;
+      const message =
+        netGain > 0
+          ? `You won ${netGain} chips`
+          : netGain === 0
+          ? "You broke even"
+          : `You lost ${Math.abs(netGain)} chips`;
+      setOutcomeNotification(message);
+    }
   };
 
   const resetStateForNewHand = () => {
@@ -192,6 +187,19 @@ const App = () => {
       setDeck(deckCopy);
     }
   }, [deck]);
+
+  const rigTheDeckAndDeal = () => {
+    const {
+      riggedDeck,
+      dealerHand,
+      riggedPlayerHands,
+      riggedCurrentHand
+    } = rigGameForSplits(bet);
+    setDeck(riggedDeck);
+    setDealerHand(dealerHand);
+    setPlayerHands(riggedPlayerHands);
+    setCurrentHand(riggedCurrentHand);
+  };
 
   //----------------------------------------------------------------//
   //                         RENDER                                 //
@@ -222,7 +230,7 @@ const App = () => {
           toggleIsRiggedForSplits={toggleIsRiggedForSplits}
         />
       </section>
-      {outcomeNotification && !gameOverNotification && (
+      {outcomeNotification && (
         <OutcomeNotification
           outcomeNotification={outcomeNotification}
           resetStateForNewHand={resetStateForNewHand}

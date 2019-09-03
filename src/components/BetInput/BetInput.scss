@@ -11,10 +11,18 @@
     height: 41px;
     width: 53px;
     margin-left: 5px;
+    font-size: 16px;
+    font-weight: 550;
+    border-radius: 1px;
+    &:hover {
+      background: rgb(140, 176, 243);
+      cursor: pointer;
+    }
   }
   .error {
     position: absolute;
-    bottom: -10px;
+    bottom: 29px;
+    left: -3px;
     color: rgb(189, 27, 27);
     font-size: 14px;
     font-weight: 800;
@@ -24,7 +32,7 @@
     position: absolute;
     top: 27px;
     left: 4px;
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: 650;
+    font-size: 16px;
   }
 }

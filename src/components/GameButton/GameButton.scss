@@ -5,10 +5,11 @@
     height: 100%;
     width: 100%;
     color: rgb(54, 19, 19);
-    border: rgb(36, 33, 32);
+    border: 3px solid #7362cf;
     border-radius: 8%;
   }
   :hover {
     cursor: pointer;
+    background: rgb(162, 193, 250);
   }
 }
