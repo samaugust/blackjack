@@ -15,7 +15,7 @@ const GameOverNotification = ({
         setChips(1000);
       }}
     >
-      Take a lean on your house
+      Take a lien on your house
     </button>
   </div>
 );
