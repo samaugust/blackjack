@@ -1,3 +1,4 @@
+export { unshuffledDeck } from "./unshuffledDeck";
 export { generateShuffledDeck } from "./generateShuffledDeck";
 export { sumHand } from "./sumHand";
 export { isSplittableHand } from "./isSplittableHand";

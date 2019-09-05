@@ -19,9 +19,12 @@ const getHandTotals = cards => {
   return cards.reduce(
     (totals, currentCard) => {
       const rank = getRankFromCard(currentCard);
-      if (rank === "ace") return { ...totals, totalAces: totals.totalAces + 1 };
-      const value = rankToValuesMap[rank];
-      return { ...totals, scoreWithoutAces: totals.scoreWithoutAces + value };
+      if (rank === "ace") {
+        return { ...totals, totalAces: totals.totalAces + 1 };
+      } else {
+        const value = rankToValuesMap[rank];
+        return { ...totals, scoreWithoutAces: totals.scoreWithoutAces + value };
+      }
     },
     { scoreWithoutAces: 0, totalAces: 0 }
   );

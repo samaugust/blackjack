@@ -14,6 +14,7 @@ UTIL FUNCTIONS
 *************/
 import { cloneDeep, isEqual } from "lodash";
 import {
+  unshuffledDeck,
   generateShuffledDeck,
   sumHand,
   isWin,
@@ -47,13 +48,17 @@ const App = () => {
   const [outcomeNotification, setOutcomeNotification] = useState("");
   const [gameOverNotification, setGameOverNotification] = useState("");
 
-  // console.log({ deck });
-  // console.log({playerHands})
-  // console.log({ dealerHand });
-
   //----------------------------------------------------------------//
   //                        SIDE EFFECTS                            //
   //----------------------------------------------------------------//
+
+  //preload images for more fluid ux
+  useEffect(() => {
+    unshuffledDeck().forEach(card => {
+      const img = new Image();
+      img.src = `./cards/${card}.png`;
+    });
+  }, []);
 
   //if bet has been submitted and player has no hand dealt, deal cards
   useEffect(() => {
