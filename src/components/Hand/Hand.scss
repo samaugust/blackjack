@@ -25,6 +25,13 @@
     color: red;
     font-weight: 1000;
   }
+  .blackjack-message {
+    position: absolute;
+    top: 4px;
+    font-size: 50px;
+    color: green;
+    font-weight: 1000;
+  }
 }
 .selected {
   border: 12px solid rgb(115, 98, 207);

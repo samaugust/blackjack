@@ -93,8 +93,12 @@ const App = () => {
   //hit the dealer. else it is time to determine the outcome
   useEffect(() => {
     if (turn === "dealer") {
-      if (sumHand(dealerHand) < 17) {
-        const delayedDeal = setTimeout(hitDealer, 1100);
+      if (
+        sumHand(dealerHand) < 17 &&
+        !playerHands.every(hand => sumHand(hand) > 21) &&
+        !playerHands.every(hand => sumHand(hand) === 21)
+      ) {
+        const delayedDeal = setTimeout(hitDealer, 400);
         return () => clearTimeout(delayedDeal);
       } else return determineOutcome();
     }
@@ -137,6 +141,14 @@ const App = () => {
   };
 
   const determineOutcome = () => {
+    if (
+      playerHands.length === 1 &&
+      currentHand.cards.length === 2 &&
+      sumHand(currentHand) === 21
+    ) {
+      setChips(chips => chips + currentHand.bet * 2);
+      setOutcomeNotification(`BLACKJACK!! YOU WON ${bet} CHIPS`);
+    }
     //for every player hand, we determine whether it is a win or a tie
     //then tally up accordingly
     const netChipsWon = playerHands.reduce((netChipsWon, playerHand) => {
@@ -179,7 +191,8 @@ const App = () => {
   };
 
   const hitDealer = useCallback(() => {
-    if (playerHands.every(hand => sumHand(hand) > 21)) {
+    if (playerHands.length && playerHands.every(hand => sumHand(hand) > 21)) {
+      console.log(dealerHand);
       determineOutcome();
     } else {
       //make copies

@@ -21,6 +21,12 @@ const Hand = ({ hand, score, currentHand, turn }) => (
       )}
     </div>
     {sumHand(hand) > 21 && <p className="busted-message">BUSTED</p>}
+    {sumHand(hand) === 21 && hand.cards.length === 2 && hand.bet && (
+      <p className="blackjack-message">BLACKJACK!</p>
+    )}
+    {sumHand(hand) === 21 && hand.cards.length > 2 && (
+      <p className="blackjack-message">21! 21! 21!</p>
+    )}
   </div>
 );
 
